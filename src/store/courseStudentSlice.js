@@ -1,4 +1,4 @@
-// store/courseStudentSlice.js
+
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../config";
 
@@ -8,27 +8,18 @@ export const fetchAllCourseStudents = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/courseStudent/all");
-
-      if (!res.data.success) {
-        return rejectWithValue(res.data.message || "Failed to fetch enrolled courses");
-      }
-
-      return {
-        enrolledCourses: res.data.enrolledCourses || [],
-        totalEnrolledCourses: res.data.totalEnrolledCourses || 0,
-      };
+      return res.data;
     } catch (err) {
-      return rejectWithValue(
-        err.response?.data?.message || "Failed to fetch enrolled courses"
-      );
+      return rejectWithValue(err.response?.data?.message || "Failed to fetch enrolled courses");
     }
   }
 );
 
-// ✅ Initial state
 const initialState = {
   enrolledCourses: [],
   totalEnrolledCourses: 0,
+  totalEnrolledUsers: 0,
+  totalUniqueCourses: 0,
   status: "idle",
   error: null,
 };
@@ -47,19 +38,22 @@ const courseStudentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchAllCourseStudents.pending, (state) => {
-        state.status = "loading";
-        state.error = null;
-      })
       .addCase(fetchAllCourseStudents.fulfilled, (state, action) => {
-        state.status = "succeeded";
-        state.enrolledCourses = action.payload.enrolledCourses;
-        state.totalEnrolledCourses = action.payload.totalEnrolledCourses;
-      })
-      .addCase(fetchAllCourseStudents.rejected, (state, action) => {
-        state.status = "failed";
-        state.error = action.payload;
-      });
+      state.enrolledCourses = action.payload.enrolledCourses;
+      state.totalEnrolledCourses = action.payload.totalEnrolledCourses;
+      state.totalEnrolledUsers = action.payload.totalEnrolledUsers;
+      state.totalUniqueCourses = action.payload.totalUniqueCourses;
+      state.loading = false;
+      state.error = null;
+    })
+    .addCase(fetchAllCourseStudents.rejected, (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    })
+    .addCase(fetchAllCourseStudents.pending, (state) => {
+      state.loading = true;
+      state.error = null;
+    });
   },
 });
 
@@ -67,8 +61,10 @@ const courseStudentSlice = createSlice({
 export const { clearEnrolledCourses } = courseStudentSlice.actions;
 export default courseStudentSlice.reducer;
 
-// ✅ Correct Selectors
+// Selectors
 export const selectAllEnrolledCourses = (state) => state.courseStudent.enrolledCourses;
-export const selectTotalEnrolledCourses = (state) => state.courseStudent.totalEnrolledCourses;
 export const selectCourseStudentStatus = (state) => state.courseStudent.status;
 export const selectCourseStudentError = (state) => state.courseStudent.error;
+export const selectTotalEnrolledCourses = (state) => state.courseStudent.totalEnrolledCourses;
+export const selectTotalEnrolledUsers = (state) => state.courseStudent.totalEnrolledUsers;
+export const selectTotalUniqueCourses = (state) => state.courseStudent.totalUniqueCourses;

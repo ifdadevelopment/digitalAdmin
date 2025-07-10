@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -14,50 +14,53 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { useDispatch, useSelector } from "react-redux";
-
-// Redux Actions & Selectors
-import { selectTotalUsers, getAllUsers } from "../store/userSlice";
-import {
-  selectTotalEnrolledCourses,
-  fetchAllCourseStudents,
-} from "../store/courseStudentSlice";
-import { selectTotalCourses, fetchCourses } from "../store/courseSlice";
-import {
-  selectAllPaymentsCount,
-  getAllSuccessfulPayments,
-} from "../store/paymentSlice";
+import { useSelector } from "react-redux";
+import { selectTotalUsers } from "../store/userSlice";
+import { selectTotalEnrolledCourses } from "../store/courseStudentSlice";
+import { selectTotalCourses } from "../store/courseSlice";
+import { selectAllPaymentsCount } from "../store/paymentSlice";
 
 const Home = () => {
-  const dispatch = useDispatch();
-
-  // Load all metrics on mount
-  useEffect(() => {
-    dispatch(getAllUsers());
-    dispatch(fetchCourses());
-    dispatch(fetchAllCourseStudents()); // ✅ FIXED: Call thunk, not selector
-    dispatch(getAllSuccessfulPayments());
-  }, [dispatch]);
-
-  // Select data from store
-  const totalUsers = useSelector(selectTotalUsers) ?? 0;
-  const totalCourses = useSelector(selectTotalCourses) ?? 0;
-  const totalEnrolledCourses = useSelector(selectTotalEnrolledCourses) ?? 0;
-  const totalPayments = useSelector(selectAllPaymentsCount) ?? 0;
+  const totalCourses = useSelector(selectTotalCourses);
+  const totalEnrolledCourses = useSelector(selectTotalEnrolledCourses);
+  const totalUsers = useSelector(selectTotalUsers);
+  const totalPayments = useSelector(selectAllPaymentsCount);
 
   const [chartType, setChartType] = useState("Bar");
 
-  // Metrics for chart
+  // Metrics data - used for both cards and chart
   const metricsData = [
-    { name: "Courses", value: totalCourses, color: "#3b82f6" },
-    { name: "Enrolled Courses", value: totalEnrolledCourses, color: "#10b981" },
-    { name: "Payments", value: totalPayments, color: "#f59e0b" },
-    { name: "Students", value: totalUsers, color: "#ef4444" },
+    {
+      name: "Courses",
+      value: totalCourses ?? 0,
+      color: "#3b82f6",
+    },
+    {
+      name: "Tests",
+      value: totalEnrolledCourses ?? 0,
+      color: "#10b981",
+    },
+    {
+      
+      name: "Payments",
+      value: totalPayments ?? 0,
+      color: "#f59e0b",
+    },
+    {
+      name: "Students",
+      value: totalUsers ?? 0,
+      color: "#ef4444",
+    },
   ];
 
+  // Render chart based on selection
   const renderChart = () => {
     if (!metricsData.length) {
-      return <div className="text-center text-gray-500 mt-10">No data available</div>;
+      return (
+        <div className="text-center text-gray-500 mt-10">
+          No data available
+        </div>
+      );
     }
 
     switch (chartType) {
@@ -68,9 +71,9 @@ const Home = () => {
             <XAxis dataKey="name" />
             <YAxis allowDecimals={false} />
             <Tooltip />
-            <Bar dataKey="value" isAnimationActive>
-              {metricsData.map((entry) => (
-                <Cell key={`bar-${entry.name}`} fill={entry.color} />
+            <Bar dataKey="value">
+              {metricsData.map((entry, index) => (
+                <Cell key={`bar-${index}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
@@ -110,8 +113,8 @@ const Home = () => {
               outerRadius={80}
               label
             >
-              {metricsData.map((entry) => (
-                <Cell key={`cell-${entry.name}`} fill={entry.color} />
+              {metricsData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
           </PieChart>
@@ -157,7 +160,7 @@ const Home = () => {
         ))}
       </div>
 
-      {/* Chart */}
+      {/* Chart Section */}
       <div className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition duration-300">
         <h2 className="text-lg font-semibold mb-2 text-gray-700">
           {chartType} Chart - Metrics Overview

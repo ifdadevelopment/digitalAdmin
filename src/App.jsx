@@ -2,12 +2,16 @@ import { useSelector } from "react-redux";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import Home from "./pages/Home";
 import AuthTabs from "./components/AuthTabs";
 import AdminDashboard from "./pages/AdminDashboard";
 import Navbar from "./components/Navbar";
 import AdminLayout from "./components/AdminLayout";
+import CourseList from "./components/CourseList";
+import PaymentList from "./components/PaymentList";
+import CourseAddForm from "./components/CourseAddForm";
+import TestAddForm from "./components/TestAddForm";
+import TestList from "./components/TestList";
 
 const App = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
@@ -26,6 +30,11 @@ const App = () => {
         {isLoggedIn && (
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="dashboard" element={<Home />} />
+            <Route  path="courses/add" element={<CourseAddForm />}/>
+            <Route  path="courses/list" element={<CourseList />}/>
+            <Route  path="/admin/payments" element={<PaymentList />}/>
+            <Route  path="tests/add" element={<TestAddForm />}/>
+            <Route  path="tests/list" element={<TestList />}/>
           </Route>
         )}
         <Route path="*" element={<Navigate to="/" />} />
