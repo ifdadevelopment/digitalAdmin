@@ -8,15 +8,20 @@ import {
   FiAward,
   FiChevronDown,
   FiChevronRight,
+  FiUser,
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
 import logo from "../assets/logo.png";
 const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(true);
   const [isCourseOpen, setIsCourseOpen] = useState(false);
+  const [isCourseStudentOpen, setIsCourseStudentOpen] = useState(false);
+  const [isCourseTestOpen, setIsCourseTestOpen] = useState(false);
 
   const toggleSidebar = () => setIsOpen(!isOpen);
   const toggleCourseMenu = () => setIsCourseOpen(!isCourseOpen);
+  const toggleCourseStudentMenu = () => setIsCourseStudentOpen(!isCourseStudentOpen);
+  const toggleCourseTestMenu = () => setIsCourseTestOpen(!isCourseTestOpen);
 
   return (
     <div
@@ -64,30 +69,88 @@ const Sidebar = () => {
           {isCourseOpen && (
             <div className={`ml-8 mt-1 space-y-1 ${!isOpen && "hidden"}`}>
               <Link
+                to="/admin/courses/add"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Add</span>
+              </Link>
+              <Link
                 to="/admin/courses/list"
                 className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
               >
                 <span>Course List</span>
               </Link>
-              <Link
-                to="/admin/courses/progress"
-                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
-              >
-                <span>Course Progress</span>
-              </Link>
+
             </div>
           )}
         </div>
+             <button
+            onClick={toggleCourseStudentMenu}
+            className="flex items-center w-full p-2 rounded-md transition hover:bg-primary hover:text-white"
+          >
+            <FiUser  size={20} />
+            {isOpen && (
+              <>
+                <span className="ml-3">Course Student </span>
+                <span className="ml-auto">
+                  {isCourseStudentOpen ? <FiChevronDown /> : <FiChevronRight />}
+                </span>
+              </>
+            )}
+          </button>
+               {isCourseStudentOpen && (
+            <div className={`ml-8 mt-1 space-y-1 ${!isOpen && "hidden"}`}>
+              <Link
+                to="/admin/CourseStudent/add"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Enrolled Add</span>
+              </Link>
+              <Link
+                to="/admin/CourseStudent/list"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Enrolled List</span>
+              </Link>
+              <Link
+                to="/admin/CourseStudent/progress"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Student Progress</span>
+              </Link>
+            </div>
+          )}
 
-        {/* Other nav items */}
-        <Link
-          to="/admin/tests"
-          className="flex items-center p-2 rounded-md transition hover:bg-primary hover:text-white"
-        >
-          <FiFileText size={20} />
-          {isOpen && <span className="ml-3">Test</span>}
-        </Link>
-
+  <button
+            onClick={toggleCourseTestMenu}
+            className="flex items-center w-full p-2 rounded-md transition hover:bg-primary hover:text-white"
+          >
+            <FiFileText  size={20} />
+            {isOpen && (
+              <>
+                <span className="ml-3">Test </span>
+                <span className="ml-auto">
+                  {isCourseTestOpen ? <FiChevronDown /> : <FiChevronRight />}
+                </span>
+              </>
+            )}
+          </button>
+               {isCourseTestOpen && (
+            <div className={`ml-8 mt-1 space-y-1 ${!isOpen && "hidden"}`}>
+              <Link
+                to="/admin/tests/add"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Test Add</span>
+              </Link>
+              <Link
+                to="/admin/tests/list"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Test List</span>
+              </Link>
+            </div>
+          )}
         <Link
           to="/admin/payments"
           className="flex items-center p-2 rounded-md transition hover:bg-primary hover:text-white"

@@ -91,7 +91,6 @@ const testSlice = createSlice({
       save("selectedTopic", null);
     },
     saveQuizReport: (state, action) => {
-      // action.payload: { quizId, quizName, score, totalQuestions }
       const { quizId, quizName, score, totalQuestions } = action.payload;
       if (!state.quizReports[quizId]) {
         state.quizReports[quizId] = {

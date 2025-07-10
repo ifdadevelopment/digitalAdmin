@@ -41,7 +41,7 @@ export const verifyPayment = createAsyncThunk(
   }
 );
 
-// Get past payments by user ID
+// Fetch user's past payments
 export const fetchPaymentsByUser = createAsyncThunk(
   "payment/fetchPaymentsByUser",
   async (userId, { rejectWithValue }) => {
@@ -53,14 +53,17 @@ export const fetchPaymentsByUser = createAsyncThunk(
     }
   }
 );
-// access all payment details 
+
+// Fetch all successful payments (admin use)
 export const getAllSuccessfulPayments = createAsyncThunk(
   "payment/getAllSuccessfulPayments",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/payment/successful");
-      const payments = res.data.payments;
-      return payments.length; 
+      return {
+        payments: res.data.payments,
+        totalCount: res.data.count,
+      };
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Failed to fetch all successful payments"
@@ -68,22 +71,24 @@ export const getAllSuccessfulPayments = createAsyncThunk(
     }
   }
 );
+// Initial state
 const initialState = {
   order: null,
   verificationResult: null,
   pastPayments: [],
   orderSummary: null,
- allPayments: [],
- allPaymentsCount: 0,         
-  allPaymentsStatus: "idle",
-  allPaymentsError: null,
+  allPayments: [],
+  allPaymentsCount: 0,
+
   orderStatus: "idle",
   verificationStatus: "idle",
   fetchStatus: "idle",
+  allPaymentsStatus: "idle",
 
   orderError: null,
   verificationError: null,
   fetchError: null,
+  allPaymentsError: null,
 };
 
 const paymentSlice = createSlice({
@@ -100,7 +105,7 @@ const paymentSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Create Order
+      // Order
       .addCase(createPaymentOrder.pending, (state) => {
         state.orderStatus = "loading";
         state.orderError = null;
@@ -114,7 +119,7 @@ const paymentSlice = createSlice({
         state.orderError = action.payload;
       })
 
-      // Verify Payment
+      // Verification
       .addCase(verifyPayment.pending, (state) => {
         state.verificationStatus = "loading";
         state.verificationError = null;
@@ -128,7 +133,7 @@ const paymentSlice = createSlice({
         state.verificationError = action.payload;
       })
 
-      // Fetch Past Payments
+      // User's past payments
       .addCase(fetchPaymentsByUser.pending, (state) => {
         state.fetchStatus = "loading";
         state.fetchError = null;
@@ -141,7 +146,9 @@ const paymentSlice = createSlice({
         state.fetchStatus = "failed";
         state.fetchError = action.payload;
       })
-       .addCase(getAllSuccessfulPayments.pending, (state) => {
+
+      // All successful payments
+      .addCase(getAllSuccessfulPayments.pending, (state) => {
         state.allPaymentsStatus = "loading";
         state.allPaymentsError = null;
       })
@@ -156,15 +163,12 @@ const paymentSlice = createSlice({
       });
   },
 });
+
 export const selectAllPayments = (state) => state.payment.allPayments;
 export const selectAllPaymentsCount = (state) => state.payment.allPaymentsCount;
 export const selectAllPaymentsStatus = (state) => state.payment.allPaymentsStatus;
 export const selectAllPaymentsError = (state) => state.payment.allPaymentsError;
 
-export const {
-  resetPaymentState,
-  setOrderSummary,
-  clearOrderSummary,
-} = paymentSlice.actions;
+export const { resetPaymentState, setOrderSummary, clearOrderSummary } = paymentSlice.actions;
 
 export default paymentSlice.reducer;
