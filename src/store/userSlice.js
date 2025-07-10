@@ -1,3 +1,4 @@
+// store/userSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../config";
 
@@ -5,7 +6,7 @@ export const getAllUsers = createAsyncThunk(
   "users/getAllUsers",
   async (_, { rejectWithValue }) => {
     try {
-      const res = await axiosInstance.get("/users/all", {
+      const res = await axiosInstance.get("/user/all", {
         withCredentials: true,
       });
 
@@ -15,14 +16,13 @@ export const getAllUsers = createAsyncThunk(
 
       return {
         users: res.data.users,
-        totalUsers: res.data.totalUsers || res.data.users.length,
+        totalUsers: res.data.count || res.data.users.length,
       };
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || "Failed to fetch users");
     }
   }
 );
-
 
 const initialState = {
   allUsers: [],

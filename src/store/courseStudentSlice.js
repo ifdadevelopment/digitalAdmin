@@ -1,19 +1,31 @@
-
+// store/courseStudentSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { axiosInstance } from "../config";
 
+// ✅ Async thunk to fetch all enrolled courses
 export const fetchAllCourseStudents = createAsyncThunk(
   "courseStudent/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/courseStudent/all");
-      return res.data;
+
+      if (!res.data.success) {
+        return rejectWithValue(res.data.message || "Failed to fetch enrolled courses");
+      }
+
+      return {
+        enrolledCourses: res.data.enrolledCourses || [],
+        totalEnrolledCourses: res.data.totalEnrolledCourses || 0,
+      };
     } catch (err) {
-      return rejectWithValue(err.response?.data?.message || "Failed to fetch enrolled courses");
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch enrolled courses"
+      );
     }
   }
 );
 
+// ✅ Initial state
 const initialState = {
   enrolledCourses: [],
   totalEnrolledCourses: 0,
@@ -21,10 +33,18 @@ const initialState = {
   error: null,
 };
 
+// ✅ Redux slice
 const courseStudentSlice = createSlice({
   name: "courseStudent",
   initialState,
-  reducers: {},
+  reducers: {
+    clearEnrolledCourses: (state) => {
+      state.enrolledCourses = [];
+      state.totalEnrolledCourses = 0;
+      state.status = "idle";
+      state.error = null;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllCourseStudents.pending, (state) => {
@@ -43,9 +63,11 @@ const courseStudentSlice = createSlice({
   },
 });
 
+// ✅ Export reducer and actions
+export const { clearEnrolledCourses } = courseStudentSlice.actions;
 export default courseStudentSlice.reducer;
 
-// Selectors
+// ✅ Correct Selectors
 export const selectAllEnrolledCourses = (state) => state.courseStudent.enrolledCourses;
 export const selectTotalEnrolledCourses = (state) => state.courseStudent.totalEnrolledCourses;
 export const selectCourseStudentStatus = (state) => state.courseStudent.status;

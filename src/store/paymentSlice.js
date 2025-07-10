@@ -59,8 +59,10 @@ export const getAllSuccessfulPayments = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/payment/successful");
-      const payments = res.data.payments;
-      return payments.length; 
+      return {
+        payments: res.data.payments,
+        totalCount: res.data.count, 
+      };
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Failed to fetch all successful payments"
@@ -141,19 +143,19 @@ const paymentSlice = createSlice({
         state.fetchStatus = "failed";
         state.fetchError = action.payload;
       })
-       .addCase(getAllSuccessfulPayments.pending, (state) => {
-        state.allPaymentsStatus = "loading";
-        state.allPaymentsError = null;
-      })
-      .addCase(getAllSuccessfulPayments.fulfilled, (state, action) => {
-        state.allPaymentsStatus = "succeeded";
-        state.allPayments = action.payload.payments;
-        state.allPaymentsCount = action.payload.totalCount;
-      })
-      .addCase(getAllSuccessfulPayments.rejected, (state, action) => {
-        state.allPaymentsStatus = "failed";
-        state.allPaymentsError = action.payload;
-      });
+.addCase(getAllSuccessfulPayments.pending, (state) => {
+  state.allPaymentsStatus = "loading";
+  state.allPaymentsError = null;
+})
+.addCase(getAllSuccessfulPayments.fulfilled, (state, action) => {
+  state.allPaymentsStatus = "succeeded";
+  state.allPayments = action.payload.payments;
+  state.allPaymentsCount = action.payload.totalCount;
+})
+.addCase(getAllSuccessfulPayments.rejected, (state, action) => {
+  state.allPaymentsStatus = "failed";
+  state.allPaymentsError = action.payload;
+});
   },
 });
 export const selectAllPayments = (state) => state.payment.allPayments;
