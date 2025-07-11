@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, createSelector } from "@reduxjs/toolkit";
 import { axiosInstance } from "../config";
 
-// Fetch all courses
+// 🔄 Fetch all courses
 export const fetchCourses = createAsyncThunk(
   "course/fetchCourses",
   async (params = {}, { rejectWithValue }) => {
@@ -17,14 +17,12 @@ export const fetchCourses = createAsyncThunk(
   }
 );
 
-// Fetch course by ID
+// 🔍 Fetch course by ID
 export const fetchCourseById = createAsyncThunk(
   "course/fetchCourseById",
   async (courseId, { getState, rejectWithValue }) => {
     try {
-      const state = getState();
-      const existing = state.course.selectedCourse;
-
+      const existing = getState().course.selectedCourse;
       if (existing && String(existing.courseId) === String(courseId)) {
         return existing;
       }
@@ -37,7 +35,7 @@ export const fetchCourseById = createAsyncThunk(
   }
 );
 
-// ✅ Create course
+// ✅ Create a new course
 export const createCourse = createAsyncThunk(
   "course/createCourse",
   async (formData, { rejectWithValue }) => {
@@ -50,7 +48,33 @@ export const createCourse = createAsyncThunk(
   }
 );
 
-// Initial state
+// ✏️ Edit existing course
+export const editCourse = createAsyncThunk(
+  "course/editCourse",
+  async ({ courseId, formData }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.put(`/courses/${courseId}`, formData);
+      return res.data.course;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to edit course");
+    }
+  }
+);
+
+// ❌ Delete course
+export const deleteCourse = createAsyncThunk(
+  "course/deleteCourse",
+  async (courseId, { rejectWithValue }) => {
+    try {
+      await axiosInstance.delete(`/courses/${courseId}`);
+      return courseId;
+    } catch (err) {
+      return rejectWithValue(err.response?.data?.message || "Failed to delete course");
+    }
+  }
+);
+
+// 🧩 Initial State
 const initialState = {
   courses: [],
   selectedCourse: null,
@@ -63,7 +87,7 @@ const initialState = {
   },
 };
 
-// Slice
+// 🚀 Slice Definition
 const courseSlice = createSlice({
   name: "course",
   initialState,
@@ -77,7 +101,7 @@ const courseSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // 🔄 Fetch All Courses
+      // Fetch All Courses
       .addCase(fetchCourses.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -92,7 +116,7 @@ const courseSlice = createSlice({
         state.error = action.payload;
       })
 
-      // 🔍 Fetch Course by ID
+      // Fetch Course by ID
       .addCase(fetchCourseById.pending, (state) => {
         state.status = "loading";
         state.error = null;
@@ -108,33 +132,89 @@ const courseSlice = createSlice({
         state.selectedCourse = null;
       })
 
-      // ✅ Create Course
+      // Create Course
       .addCase(createCourse.pending, (state) => {
         state.status = "creating";
         state.error = null;
       })
       .addCase(createCourse.fulfilled, (state, action) => {
         state.status = "created";
-        state.courses.unshift(action.payload); 
+        state.courses.unshift(action.payload);
       })
       .addCase(createCourse.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
+      // Edit Course
+      .addCase(editCourse.pending, (state) => {
+        state.status = "updating";
+        state.error = null;
+      })
+      .addCase(editCourse.fulfilled, (state, action) => {
+        state.status = "updated";
+        const updatedCourse = action.payload;
+
+        // Update course in list
+        const index = state.courses.findIndex(
+          (c) => c.courseId === updatedCourse.courseId
+        );
+        if (index !== -1) {
+          state.courses[index] = updatedCourse;
+        }
+
+        // Update selectedCourse if matched
+        if (
+          state.selectedCourse &&
+          state.selectedCourse.courseId === updatedCourse.courseId
+        ) {
+          state.selectedCourse = updatedCourse;
+        }
+      })
+      .addCase(editCourse.rejected, (state, action) => {
+        state.status = "failed";
+        state.error = action.payload;
+      })
+
+      // Delete Course
+      .addCase(deleteCourse.pending, (state) => {
+        state.status = "deleting";
+        state.error = null;
+      })
+      .addCase(deleteCourse.fulfilled, (state, action) => {
+        state.status = "deleted";
+        const deletedId = action.payload;
+        state.courses = state.courses.filter(c => c.courseId !== deletedId);
+
+        if (
+          state.selectedCourse &&
+          state.selectedCourse.courseId === deletedId
+        ) {
+          state.selectedCourse = null;
+        }
+
+        state.totalCount -= 1;
+      })
+      .addCase(deleteCourse.rejected, (state, action) => {
         state.status = "failed";
         state.error = action.payload;
       });
   },
 });
 
-export const { setPagination,resetSelectedCourse } = courseSlice.actions;
-
+// 📤 Actions
+export const { setPagination, resetSelectedCourse } = courseSlice.actions;
 export default courseSlice.reducer;
 
-// Selectors
+// 📌 Selectors
 export const selectCourses = (state) => state.course.courses;
 export const selectSelectedCourse = (state) => state.course.selectedCourse;
 export const selectCourseStatus = (state) => state.course.status;
 export const selectCourseError = (state) => state.course.error;
 export const selectTotalCourses = (state) => state.course.totalCount;
-export const selectCourseStudentPagination = (state) => state.courseStudent.pagination;
+export const selectCoursePagination = (state) =>
+  state.courseStudent?.pagination;
+
 export const selectTotalHours = createSelector([selectCourses], (courses) =>
   courses.reduce((sum, course) => sum + (course.totalHours || 0), 0)
 );
@@ -144,11 +224,18 @@ export const selectTotalModules = createSelector([selectCourses], (courses) =>
 );
 
 export const selectTotalLessons = createSelector([selectCourses], (courses) =>
-  courses.reduce((sum, course) =>
-    sum + (Array.isArray(course.modules)
-      ? course.modules.reduce((mSum, mod) =>
-          mSum + (Array.isArray(mod.lessons) ? mod.lessons.length : 0), 0)
-      : 0), 0)
+  courses.reduce(
+    (sum, course) =>
+      sum +
+      (Array.isArray(course.modules)
+        ? course.modules.reduce(
+            (mSum, mod) =>
+              mSum + (Array.isArray(mod.lessons) ? mod.lessons.length : 0),
+            0
+          )
+        : 0),
+    0
+  )
 );
 
 export const selectLevels = createSelector([selectCourses], (courses) =>

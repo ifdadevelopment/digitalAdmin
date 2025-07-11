@@ -139,7 +139,7 @@ const AdminDashboard = () => {
             ) : (
               <div
                 onClick={() => isEditing && imageRef.current.click()}
-                className="w-20 h-20 rounded-full flex items-center justify-center bg-blue-600 text-white text-2xl font-bold font-nunito select-none cursor-pointer"
+                className="w-20 h-20 rounded-full flex items-center justify-center bg-primary text-white text-2xl font-bold font-nunito select-none cursor-pointer"
               >
                 {getInitials(user?.name || "")}
               </div>
@@ -164,7 +164,7 @@ const AdminDashboard = () => {
               {!isEditing && (
                 <button
                   onClick={() => setIsEditing(true)}
-                  className="sm:hidden mt-3 bg-blue-600 text-white px-4 py-1.5 rounded text-sm font-nunito hover:bg-blue-700 transition"
+                  className="sm:hidden mt-3 bg-primary text-white px-4 py-1.5 rounded text-sm font-nunito hover:bg-blue-700 transition"
                 >
                   Edit
                 </button>
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
           {!isEditing && (
             <button
               onClick={() => setIsEditing(true)}
-              className="hidden sm:inline-block bg-blue-600 text-white px-5 py-2 rounded text-sm font-nunito hover:bg-blue-700 transition"
+              className="hidden sm:inline-block bg-primary text-white px-5 py-2 rounded text-sm font-nunito hover:bg-blue-700 transition"
             >
               Edit
             </button>
@@ -184,6 +184,14 @@ const AdminDashboard = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
+                       <label className="block text-sm  font-medium font-nunito">Name</label>
+           <input
+  name="name"
+  value={formData.name || ""}
+  onChange={handleChange}
+  disabled={!isEditing}
+  className="mt-1 w-full px-3 mb-2 py-2 border rounded-md shadow-sm font-nunito bg-gray-100 cursor-not-allowed"
+/>
             <label className="block text-sm font-medium font-nunito">Email</label>
             <input
               type="email"
@@ -191,6 +199,7 @@ const AdminDashboard = () => {
               value={user?.email || ""}
               className="mt-1 w-full px-3 py-2 border rounded-md shadow-sm font-nunito bg-gray-100 cursor-not-allowed"
             />
+ 
           </div>
 
           {["phone", "address"].map((field) => {
