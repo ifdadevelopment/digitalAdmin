@@ -80,7 +80,6 @@ const Sidebar = () => {
               >
                 <span>Course List</span>
               </Link>
-
             </div>
           )}
         </div>
@@ -148,6 +147,12 @@ const Sidebar = () => {
                 className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
               >
                 <span>Course Test List</span>
+              </Link>
+              <Link
+                to="/admin/tests/score"
+                className="flex items-center text-sm p-2 rounded-md transition hover:bg-primary hover:text-white"
+              >
+                <span>Course Test Score</span>
               </Link>
             </div>
           )}

@@ -7,6 +7,7 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { store, persistor, initAuth } from "./store";
 import { axiosInstance } from "./config";
+
 axiosInstance.interceptors.request.use(
   (config) => {
     const state = store.getState();
@@ -16,6 +17,16 @@ axiosInstance.interceptors.request.use(
     } else {
       delete config.headers.Authorization;
     }
+
+    const isFormData =
+      config.data instanceof FormData ||
+      (config.headers && config.headers["Content-Type"] === "multipart/form-data");
+    if (isFormData) {
+      delete config.headers["Content-Type"];
+    } else {
+      config.headers["Content-Type"] = "application/json";
+    }
+
     return config;
   },
   (error) => Promise.reject(error)

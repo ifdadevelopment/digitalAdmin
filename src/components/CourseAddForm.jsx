@@ -6,10 +6,10 @@ import {createCourse} from "../store/courseSlice.js"
 const CourseAddForm = () => {
   const dispatch = useDispatch();
 
-const handleCreateCourse = async (courseData) => {
+const handleCreateCourse = async (formData) => {
   try {
-    console.log("Creating course with data:", courseData);
-    await dispatch(createCourse(courseData)).unwrap();
+    console.log("Creating course with data:", formData);
+    await dispatch(createCourse(formData)).unwrap();
     console.log("✅ Course created successfully!");
   } catch (err) {
     console.error("❌ Course creation failed:", err);

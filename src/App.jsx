@@ -12,6 +12,9 @@ import PaymentList from "./components/PaymentList";
 import CourseAddForm from "./components/CourseAddForm";
 import TestAddForm from "./components/TestAddForm";
 import TestList from "./components/TestList";
+import CourseEditForm from "./components/CourseEditForm";
+import TestScore from "./components/TestScore";
+import CourseEnrolledAdd from "./components/CourseEnrolledAdd";
 
 const App = () => {
   const { isLoggedIn } = useSelector((state) => state.auth);
@@ -32,9 +35,12 @@ const App = () => {
             <Route path="dashboard" element={<Home />} />
             <Route  path="courses/add" element={<CourseAddForm />}/>
             <Route  path="courses/list" element={<CourseList />}/>
+            <Route  path="CourseStudent/add" element={<CourseEnrolledAdd />}/>
             <Route  path="/admin/payments" element={<PaymentList />}/>
             <Route  path="tests/add" element={<TestAddForm />}/>
             <Route  path="tests/list" element={<TestList />}/>
+            <Route  path="tests/score" element={<TestScore />}/>
+            <Route path="courses/edit/:courseId" element={<CourseEditForm />} />
           </Route>
         )}
         <Route path="*" element={<Navigate to="/" />} />
