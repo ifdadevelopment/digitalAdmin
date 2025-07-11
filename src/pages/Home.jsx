@@ -157,7 +157,7 @@ const Home = () => {
               {metric.value.toLocaleString()}
             </p>
           </div>
-        ))}
+        ))} 
       </div>
 
       {/* Chart Section */}
