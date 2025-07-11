@@ -60,8 +60,10 @@ export const getAllSuccessfulPayments = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const res = await axiosInstance.get("/payment/successful");
-      const payments = res.data.payments;
-      return payments.length; 
+      return {
+        payments: res.data.payments,
+        totalCount: res.data.count,
+      };
     } catch (err) {
       return rejectWithValue(
         err.response?.data?.message || "Failed to fetch all successful payments"
@@ -144,7 +146,9 @@ const paymentSlice = createSlice({
         state.fetchStatus = "failed";
         state.fetchError = action.payload;
       })
-       .addCase(getAllSuccessfulPayments.pending, (state) => {
+
+      // All successful payments
+      .addCase(getAllSuccessfulPayments.pending, (state) => {
         state.allPaymentsStatus = "loading";
         state.allPaymentsError = null;
       })

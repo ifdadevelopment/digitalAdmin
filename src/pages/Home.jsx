@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   BarChart,
   Bar,
@@ -14,54 +14,52 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { useSelector } from "react-redux";
-import { selectTotalUsers } from "../store/userSlice";
-import { selectTotalEnrolledCourses } from "../store/courseStudentSlice";
-import { selectTotalCourses } from "../store/courseSlice";
-import { selectAllPaymentsCount } from "../store/paymentSlice";
+import { useSelector, useDispatch } from "react-redux";
+
+// Redux selectors and thunks
+import { selectTotalCourses, fetchCourses } from "../store/courseSlice";
+import {
+  selectTotalEnrolledCourses,
+  fetchAllCourseStudents,
+} from "../store/courseStudentSlice";
+import { selectTotalUsers, getAllUsers } from "../store/userSlice";
+import {
+  selectAllPaymentsCount,
+  getAllSuccessfulPayments,
+} from "../store/paymentSlice";
 
 const Home = () => {
-  const totalCourses = useSelector(selectTotalCourses);
-  const totalEnrolledCourses = useSelector(selectTotalEnrolledCourses);
-  const totalUsers = useSelector(selectTotalUsers);
-  const totalPayments = useSelector(selectAllPaymentsCount);
-
+  const dispatch = useDispatch();
   const [chartType, setChartType] = useState("Bar");
 
-  // Metrics data - used for both cards and chart
-  const metricsData = [
-    {
-      name: "Courses",
-      value: totalCourses ?? 0,
-      color: "#3b82f6",
-    },
-    {
-      name: "Tests",
-      value: totalEnrolledCourses ?? 0,
-      color: "#10b981",
-    },
-    {
-      
-      name: "Payments",
-      value: totalPayments ?? 0,
-      color: "#f59e0b",
-    },
-    {
-      name: "Students",
-      value: totalUsers ?? 0,
-      color: "#ef4444",
-    },
-  ];
+  // Fetch all required data on mount
+  useEffect(() => {
+    dispatch(fetchCourses());
+    dispatch(fetchAllCourseStudents());
+    dispatch(getAllUsers());
+    dispatch(getAllSuccessfulPayments());
+  }, [dispatch]);
+
+  // Redux state
+  const totalCourses = useSelector(selectTotalCourses) ?? 0;
+  const totalEnrollments = useSelector(selectTotalEnrolledCourses) ?? 0;
+  const totalUsers = useSelector(selectTotalUsers) ?? 0;
+  const totalPayments = useSelector(selectAllPaymentsCount) ?? 0;
+
+  // Prepare chart/metric data
+  const metricsData = useMemo(
+    () => [
+      { name: "Courses", value: totalCourses, color: "#3b82f6" },
+      { name: "Enrollments", value: totalEnrollments, color: "#10b981" },
+      { name: "Payments", value: totalPayments, color: "#f59e0b" },
+      { name: "Students", value: totalUsers, color: "#ef4444" },
+    ],
+    [totalCourses, totalEnrollments, totalPayments, totalUsers]
+  );
 
   // Render chart based on selection
   const renderChart = () => {
-    if (!metricsData.length) {
-      return (
-        <div className="text-center text-gray-500 mt-10">
-          No data available
-        </div>
-      );
-    }
+    if (!metricsData.length) return <p>No data available</p>;
 
     switch (chartType) {
       case "Bar":
@@ -73,7 +71,7 @@ const Home = () => {
             <Tooltip />
             <Bar dataKey="value">
               {metricsData.map((entry, index) => (
-                <Cell key={`bar-${index}`} fill={entry.color} />
+                <Cell key={index} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>
@@ -91,8 +89,6 @@ const Home = () => {
               dataKey="value"
               stroke="#6366f1"
               strokeWidth={2}
-              activeDot={{ r: 6 }}
-              isAnimationActive
             />
           </LineChart>
         );
@@ -114,7 +110,7 @@ const Home = () => {
               label
             >
               {metricsData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+                <Cell key={index} fill={entry.color} />
               ))}
             </Pie>
           </PieChart>
@@ -147,9 +143,9 @@ const Home = () => {
 
       {/* Metric Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        {metricsData.map((metric) => (
+        {metricsData.map((metric, i) => (
           <div
-            key={metric.name}
+            key={i}
             className="bg-white p-4 rounded-xl shadow text-center hover:shadow-md transition"
           >
             <p className="text-sm text-gray-500">{metric.name}</p>
@@ -157,7 +153,7 @@ const Home = () => {
               {metric.value.toLocaleString()}
             </p>
           </div>
-        ))} 
+        ))}
       </div>
 
       {/* Chart Section */}
