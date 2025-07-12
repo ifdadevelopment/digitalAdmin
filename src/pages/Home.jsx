@@ -16,7 +16,6 @@ import {
 } from "recharts";
 import { useSelector, useDispatch } from "react-redux";
 
-// Redux selectors and thunks
 import { selectTotalCourses, fetchCourses } from "../store/courseSlice";
 import {
   selectTotalEnrolledCourses,
@@ -32,7 +31,6 @@ const Home = () => {
   const dispatch = useDispatch();
   const [chartType, setChartType] = useState("Bar");
 
-  // Fetch all required data on mount
   useEffect(() => {
     dispatch(fetchCourses());
     dispatch(fetchAllCourseStudents());
@@ -40,13 +38,11 @@ const Home = () => {
     dispatch(getAllSuccessfulPayments());
   }, [dispatch]);
 
-  // Redux state
   const totalCourses = useSelector(selectTotalCourses) ?? 0;
   const totalEnrollments = useSelector(selectTotalEnrolledCourses) ?? 0;
   const totalUsers = useSelector(selectTotalUsers) ?? 0;
   const totalPayments = useSelector(selectAllPaymentsCount) ?? 0;
 
-  // Prepare chart/metric data
   const metricsData = useMemo(
     () => [
       { name: "Courses", value: totalCourses, color: "#3b82f6" },
@@ -57,9 +53,8 @@ const Home = () => {
     [totalCourses, totalEnrollments, totalPayments, totalUsers]
   );
 
-  // Render chart based on selection
   const renderChart = () => {
-    if (!metricsData.length) return <p>No data available</p>;
+    if (!metricsData.length) return <p className="text-sm">No data available</p>;
 
     switch (chartType) {
       case "Bar":
@@ -122,23 +117,23 @@ const Home = () => {
   };
 
   return (
-    <div className="p-4 max-w-7xl mx-auto font-nunito">
+    <div className="p-4 sm:p-6 max-w-7xl mx-auto font-nunito">
       {/* Controls */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6 items-start sm:items-center">
         <div className="flex flex-wrap gap-3">
           <select
             value={chartType}
             onChange={(e) => setChartType(e.target.value)}
-            className="border px-3 py-2 rounded-md shadow-sm text-sm"
+            className="border border-gray-300 px-3 py-2 rounded-md shadow-sm text-sm focus:outline-none"
           >
             {["Bar", "Line", "Pie", "Donut"].map((type) => (
-              <option key={type}>{type}</option>
+              <option key={type} value={type}>
+                {type}
+              </option>
             ))}
           </select>
         </div>
-        <h1 className="text-xl sm:text-2xl font-bold text-primary">
-          Platform Metrics
-        </h1>
+        <h1 className="text-lg sm:text-2xl font-bold text-primary">Platform Metrics</h1>
       </div>
 
       {/* Metric Cards */}
@@ -146,22 +141,22 @@ const Home = () => {
         {metricsData.map((metric, i) => (
           <div
             key={i}
-            className="bg-white p-4 rounded-xl shadow text-center hover:shadow-md transition"
+            className="bg-white p-4 sm:p-5 rounded-xl shadow text-center hover:shadow-md transition"
           >
             <p className="text-sm text-gray-500">{metric.name}</p>
-            <p className="text-xl font-bold" style={{ color: metric.color }}>
+            <p className="text-lg sm:text-xl font-bold" style={{ color: metric.color }}>
               {metric.value.toLocaleString()}
             </p>
           </div>
         ))}
       </div>
 
-      {/* Chart Section */}
-      <div className="bg-white p-4 rounded-xl shadow hover:shadow-lg transition duration-300">
-        <h2 className="text-lg font-semibold mb-2 text-gray-700">
+      {/* Chart */}
+      <div className="bg-white p-4 sm:p-6 rounded-xl shadow hover:shadow-lg transition duration-300">
+        <h2 className="text-md sm:text-lg font-semibold mb-3 text-gray-700">
           {chartType} Chart - Metrics Overview
         </h2>
-        <div className="h-72">
+        <div className="h-[300px] sm:h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             {renderChart()}
           </ResponsiveContainer>

@@ -146,11 +146,8 @@ const courseStudentSlice = createSlice({
   },
 });
 
-// ✅ Actions
 export const { clearEnrolledCourses } = courseStudentSlice.actions;
 export default courseStudentSlice.reducer;
-
-// ✅ Selectors
 export const selectAllEnrolledCourses = (state) => state.courseStudent.enrolledCourses;
 export const selectCourseStudentStatus = (state) => state.courseStudent.status;
 export const selectCourseStudentError = (state) => state.courseStudent.error;
