@@ -40,7 +40,7 @@ const rootReducer = combineReducers({
   certificate: certificateReducer,
   form: formReducer,
   blog:blogReducer,
-  courseStudent:courseStudentReducer,
+  courseStudent: courseStudentReducer,
   payment: paymentReducer,
   users: userReducer,
 });
