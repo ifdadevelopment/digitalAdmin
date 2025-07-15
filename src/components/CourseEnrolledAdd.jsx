@@ -420,6 +420,8 @@ const CourseEnrolledAdd = () => {
                                     </option>
                                   ))}
                                 </select>
+
+                                {/* Content Name */}
                                 <input
                                   type="text"
                                   placeholder="Content Name"
@@ -433,6 +435,8 @@ const CourseEnrolledAdd = () => {
                                     updateAndSetModules(updated);
                                   }}
                                 />
+
+                                {/* Duration or Pages */}
                                 {["video", "audio"].includes(content.type) && (
                                   <input
                                     type="text"
@@ -463,6 +467,8 @@ const CourseEnrolledAdd = () => {
                                     }}
                                   />
                                 )}
+
+                                {/* Content URL Input */}
                                 <input
                                   type="text"
                                   placeholder="Content URL"
@@ -476,6 +482,134 @@ const CourseEnrolledAdd = () => {
                                     updateAndSetModules(updated);
                                   }}
                                 />
+
+                                {/* File Upload Input */}
+                                <input
+                                  type="file"
+                                  className="border p-2 rounded w-full"
+                                  accept={
+                                    content.type === "video"
+                                      ? "video/*"
+                                      : content.type === "audio"
+                                      ? "audio/*"
+                                      : content.type === "pdf"
+                                      ? "application/pdf"
+                                      : content.type === "image"
+                                      ? "image/*"
+                                      : "*"
+                                  }
+                                  onChange={(e) => {
+                                    const file = e.target.files[0];
+                                    if (file) {
+                                      const fileUrl = URL.createObjectURL(file);
+                                      const updated = [...formData.modules];
+                                      const contentData =
+                                        updated[mIndex].topics[tIndex].contents[
+                                          cIndex
+                                        ];
+
+                                      contentData.url = fileUrl;
+
+                                      // Auto duration for video/audio
+                                      if (
+                                        ["video", "audio"].includes(
+                                          content.type
+                                        )
+                                      ) {
+                                        const media = document.createElement(
+                                          content.type
+                                        );
+                                        media.src = fileUrl;
+                                        media.preload = "metadata";
+                                        media.onloadedmetadata = () => {
+                                          const seconds = media.duration || 0;
+                                          const hours = +(
+                                            seconds / 3600
+                                          ).toFixed(2);
+                                          contentData.duration = hours;
+                                          updateAndSetModules(updated);
+                                        };
+                                      } else {
+                                        updateAndSetModules(updated);
+                                      }
+                                    }
+                                  }}
+                                />
+                                {/* Pages - Manual Entry for PDF/Image */}
+                                {["pdf", "image"].includes(content.type) && (
+                                  <input
+                                    type="number"
+                                    placeholder="Pages"
+                                    className="border p-2 rounded w-full"
+                                    value={content.pages}
+                                    onChange={(e) => {
+                                      const updated = [...formData.modules];
+                                      updated[mIndex].topics[tIndex].contents[
+                                        cIndex
+                                      ].pages = e.target.value;
+                                      updateAndSetModules(updated);
+                                    }}
+                                  />
+                                )}
+
+                                {/* File Preview */}
+                                {content.url && (
+                                  <div className="mt-2">
+                                    <label className="block text-sm font-semibold mb-1">
+                                      Preview:
+                                    </label>
+
+                                    {content.type === "video" && (
+                                      <video
+                                        controls
+                                        src={content.url}
+                                        className="w-full rounded"
+                                      />
+                                    )}
+                                    {content.type === "audio" && (
+                                      <audio
+                                        controls
+                                        src={content.url}
+                                        className="w-full"
+                                      />
+                                    )}
+                                    {content.type === "image" && (
+                                      <img
+                                        src={content.url}
+                                        alt="Preview"
+                                        className="w-full rounded"
+                                      />
+                                    )}
+                                    {content.type === "pdf" && (
+                                      <iframe
+                                        src={content.url}
+                                        title="PDF Preview"
+                                        className="w-full h-64 border rounded"
+                                      ></iframe>
+                                    )}
+
+                                    <button
+                                      onClick={() => {
+                                        const updated = [...formData.modules];
+                                        updated[mIndex].topics[tIndex].contents[
+                                          cIndex
+                                        ].url = "";
+                                        updated[mIndex].topics[tIndex].contents[
+                                          cIndex
+                                        ].duration = "";
+                                        updated[mIndex].topics[tIndex].contents[
+                                          cIndex
+                                        ].pages = "";
+                                        updateAndSetModules(updated);
+                                      }}
+                                      className="text-red-500 text-sm mt-1"
+                                    >
+                                      ❌ Remove File
+                                    </button>
+                                  </div>
+                                )}
+
+                                {/* Completed */}
                                 <label className="inline-flex items-center gap-2">
                                   <input
                                     type="checkbox"
@@ -490,6 +624,8 @@ const CourseEnrolledAdd = () => {
                                   />
                                   <span className="text-sm">Completed</span>
                                 </label>
+
+                                {/* Remove Content Button */}
                                 <button
                                   onClick={() =>
                                     handleRemoveContent(mIndex, tIndex, cIndex)
@@ -498,6 +634,7 @@ const CourseEnrolledAdd = () => {
                                 >
                                   Remove
                                 </button>
+
                                 <button
                                   onClick={() =>
                                     handleAddQuestion(mIndex, tIndex, cIndex)
